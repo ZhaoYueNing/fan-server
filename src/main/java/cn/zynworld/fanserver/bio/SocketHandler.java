@@ -26,40 +26,31 @@ public class SocketHandler implements Runnable {
         }
 
         try (
-            // 获取读写流
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
             InputStream in = socket.getInputStream();
             OutputStream out = socket.getOutputStream();
         ){
-            log.info("size :{}",socket.getInputStream().available());
-            while (!reader.ready()) {
+            byte[] bytes = new byte[200];
+
+            while (socket.getInputStream().) {
                 Thread.sleep(100);
             }
-
-            byte[] bytes = new byte[200];
             int readCount = in.read(bytes);
-
-            String content = null;
-            content = reader.readLine();
             StringBuilder builder = new StringBuilder();
-            while (Objects.nonNull(content) && reader.ready()) {
-                log.info("read data: {}", content);
-                builder.append(content);
-                builder.append("\n");
-                content = reader.readLine();
+            while (readCount > 0) {
+                builder.append(new String(bytes));
+                readCount = in.read(bytes);
             }
+
+            log.info("{}", builder.toString());
 
             //将响应头发送给客户端
             String responseFirstLine = "HTTP/1.1 200 OK\r\n";
             String responseHead = "Content-Type: text/html\r\n";
-            writer.write(responseFirstLine);
-            writer.write(responseHead);
-            writer.write("\r\n");
-            writer.write(builder.toString());
-            writer.flush();
-            writer.close();
+            out.write(responseFirstLine.getBytes());
+            out.write(responseHead.getBytes());
+            out.write("\r\n".getBytes());
+            out.write(builder.toString().getBytes());
+            out.flush();
             log.info("### 线程结束");
         } catch (Exception e) {
             e.printStackTrace();
