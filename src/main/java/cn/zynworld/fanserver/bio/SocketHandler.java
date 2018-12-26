@@ -29,28 +29,23 @@ public class SocketHandler implements Runnable {
             InputStream in = socket.getInputStream();
             OutputStream out = socket.getOutputStream();
         ){
-            byte[] bytes = new byte[200];
+            log.info("request. url:{} ",socket.getInetAddress().getHostAddress());
+            byte[] bufBytes = new byte[200];
 
-            while (socket.getInputStream().) {
-                Thread.sleep(100);
+            int readCount = in.read(bufBytes);
+            while ( readCount >= 0) {
+                log.info("request content : {}", new String(bufBytes, 0, readCount));
+                log.info("in.available:{}", in.available());
+                if (in.available() <= 0) { break; }
+                readCount = in.read(bufBytes);
             }
-            int readCount = in.read(bytes);
-            StringBuilder builder = new StringBuilder();
-            while (readCount > 0) {
-                builder.append(new String(bytes));
-                readCount = in.read(bytes);
-            }
-
-            log.info("{}", builder.toString());
 
             //将响应头发送给客户端
             String responseFirstLine = "HTTP/1.1 200 OK\r\n";
             String responseHead = "Content-Type: text/html\r\n";
-            out.write(responseFirstLine.getBytes());
-            out.write(responseHead.getBytes());
-            out.write("\r\n".getBytes());
-            out.write(builder.toString().getBytes());
+            out.write((responseFirstLine + responseHead + "\r\n" + "Hello World").getBytes());
             out.flush();
+
             log.info("### 线程结束");
         } catch (Exception e) {
             e.printStackTrace();
